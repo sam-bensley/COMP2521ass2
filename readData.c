@@ -1,22 +1,31 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "DLList.h"
+#include "Graph.h"
 
-#define MAXLENGTH 6
-#define MAXNUMURLS 20
 
 int main(int argc, char *argv[]){
     return 0;
 
 }
 
-char **getCollection(){
+DLList getCollection(){
     FILE *collection = fopen("collection.txt", "r");
-    char url[MAXLENGTH];
-    
-    char **ret = calloc(MAXNUMURLS, MAXLENGTH);
-    int i = 0;
+    char url[BUFSIZ];
+    DLList newList = newDLList();
     while(fscanf(collection, "%s", url) == 1){
-        strcpy(ret[i], url);
+        DLListAfter(newList, url);
     }
-    return ret;
+    return newList;
+}
+
+Graph getGraph(DLList list){
+    Graph g = newGraph(DLListLength(list));
+    DLListNode *curr = list->first;
+    while(curr != NULL){
+        //insert edgese here!
+
+    }
+    return newGraph;
+
 }
