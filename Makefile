@@ -1,18 +1,17 @@
 CC=gcc
 CFLAGS=-Wall -Werror -g
-OBJS=BSTree.o Queue.o Graph.o DLList.o
+PGERANKOBJS = BSTree.o graph.o DLList.o pagerank.o
 BINS=bst mkrand mkpref
 
-pagerank : $(OBJS)
-	$(CC) -o pagerank $(OBJS)
-
-BSTree.o : BSTree.c BSTree.h Queue.h
-Queue.o : Queue.c Queue.h Item.h
-DLList.o: DLList.c DLList.h
+pagerank : $(PGERANKOBJS)
+	$(CC) $(CFLAGS) -o pagerank $(PGERANKOBJS)
 
 
-tests : bst
-	cd tests ; make
+graph.o: graph.c graph.h
+BSTree.o : BSTree.c BSTree.h
+DLList.o : DLList.c DLList.h
+pagerank.o: pagerank.c graph.c graph.h readData.c DLList.c DLList.h
+
 
 clean :
-	rm -fr $(BINS) $(OBJS) core *.dSYM tests/*.observed
+	rm -fr $(BINS) $(PGERANKOBJS) core 
