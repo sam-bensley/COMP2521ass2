@@ -1,10 +1,11 @@
-// Queue.h ... interface to Queue ADT
-// Written by John Shepherd, March 2013
+// Queue.h ... interface to Queue-of-BSTree-nodes ADT
 
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#include "Item.h"
+#include "BSTree.h"
+typedef struct BSTNode *Item;
+#define showItem showBSTreeNode
 
 typedef struct QueueRep *Queue;
 

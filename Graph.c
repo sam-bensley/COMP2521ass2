@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <string.h>
 #include "Graph.h"
-#include "Queue.h"
 
 #define FALSE 0
 #define TRUE !FALSE
@@ -99,75 +98,6 @@ void showGraph(Graph g, char **names)
 	}
 }
 
-// find a path between two vertices using breadth-first traversal
-// only allow edges whose weight is less than "max"
-int findPath(Graph g, Vertex src, Vertex dest, int max, int *path)
-{
-	assert(g != NULL);
-	  	
-	// Initialise array to hold if a city has been visited
-	int visited[g->nV]; // should be 30 in length
-	int i; for (i = 0; i < g->nV; i++) visited[i] = -1;
-	
-	// set src to be seen
-	visited[src] = src;
-	
-	// Variable to represent once dest has been found
-	int destFound = FALSE;
-
-	Queue q = newQueue();
-    QueueJoin(q, src);
-    while (!QueueIsEmpty(q) && !destFound)
-    {
-        // Grab next in queue
-        Vertex curr = QueueLeave(q);
-        
-        // Check this isn't the dest
-        if (curr == dest){ destFound = TRUE; break;}
-        
-        // Breadth search the graph 
-        Vertex i;
-        for (i = 0; i < g->nV; i++)
-        {
-            // Check this can join to curr
-            if (!g->edges[curr][i]) continue;
-            // Check this has not been visited
-            if (visited[i] != -1) continue;
-            // Check the edge weight is less than max
-            if (g->edges[curr][i] > max) continue;
-            
-            // If execution reaches here, we can add this to path
-            visited[i] = curr;
-            
-            // Add this to the Queue, mark as seen
-            QueueJoin(q, i);            
-        }                                         
-    }
-    
-    dropQueue(q);
-    
-    //printf("RUN\n\n\n");
-    // If dest has been found, update path array
-    if (!destFound) return 0;
-    
-	int numVertices = 0;
-	i = dest;	
-    while (i != src)    
-    {
-        path[numVertices] = i;    
-        numVertices++;
-        
-        i = visited[i];
-    }
-    
-    path[numVertices] = src;
-    numVertices++;
-    
-    // Reverse array
-    reverse(path, 0, numVertices - 1);
-       	
-	return numVertices; 
-}
 
 void reverse(int arr[], int start, int end) 
 { 

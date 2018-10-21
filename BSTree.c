@@ -7,9 +7,6 @@
 #include "BSTree.h"
 #include "Queue.h"
 
-#define TRUE 1
-#define FALSE 0
-
 typedef struct BSTNode *BSTLink;
 
 typedef struct BSTNode {
@@ -87,7 +84,21 @@ void BSTreePostfix(BSTree t)
 // print values in level-order
 void BSTreeLevelOrder(BSTree t)
 {
-	return; // TODO
+	Queue q = newQueue();
+
+	if (t == NULL)
+		return;
+
+	QueueJoin(q, t);
+	while(!QueueIsEmpty(q)){
+		BSTLink curr = QueueLeave(q);
+		printf("%d ", curr->value);
+		if(curr->left != NULL)
+			QueueJoin(q, curr->left);
+		if(curr->right != NULL)
+			QueueJoin(q, curr->right);
+	}
+	return;
 }
 
 // count #nodes in BSTree
@@ -100,65 +111,21 @@ int BSTreeNumNodes(BSTree t)
 	             + BSTreeNumNodes(t->right);
 }
 
-// count #leaves in BSTree
 int BSTreeNumLeaves(BSTree t)
 {
-   int numLeaves = 0;
-   
-   if(t->right == NULL && t->left == NULL) 
+    if(t == NULL){
+        return 0;
+    }
+    
+    //base case
+    if(t->left == NULL && t->right == NULL){
+        return 1;
+    }
+    
+    return BSTreeNumLeaves(t->left)+ BSTreeNumLeaves(t->right);
 
-
-   return numleaves;
+    
 }
-/*	
-void breadthFirst(Graph g, Vertex v)
-{
-   int *visited = calloc(g->nV,sizeof(int));
-   Queue q = newQueue();
-   QueueJoin(q, v);
-   while (QueueLength(q) > 0) {
-      Vertex y, x = QueueLeave(q);
-      if (visited[x]) continue;
-      visited[x] = 1;
-      printf("%d\n",x);
-      for (y = 0; y < g->nV; y++) {
-         if (!g->edges[x][y]) continue;
-         if (!visited[y]) QueueJoin(q,y);
-      }  
-   }
-}
-*/	
-/*	
-	int numLeaves = 0;
-	
-	// Initialise visited array
-	int visited[BSTreeNumNodes(t)];
-	int i;
-	for (i = 0; i < BSTreeNumNodes(t); i++) visited[i] = FALSE;
-	
-	// Check left and right of head while queue is not empty
-	Queue q = newQueue();
-	QueueJoin(q, t->value);	
-	while(!QueueIsEmpty(q))
-	{
-	    // grab node from queue to compare
-	    BSTNode x = QueueLeave(q);	    
-	    
-	    if (visited[x->value]) continue;	    
-	    visited[x->value] = TRUE;
-	   
-	    // check if leaf
-	    if (x->left == NULL && x->right == NULL) { numLeaves++; continue; }
-	    
-	    // add more links to queue
-	    if (x->left != NULL) QueueJoin(q, x->left->value);
-	    if (x->right != NULL) QueueJoin(q, x->right->value);
-	}
-
-	dropQueue(q);
-	return numLeaves;
-}
-*/
 
 // insert a new value into a BSTree
 BSTree BSTreeInsert(BSTree t, int v)
