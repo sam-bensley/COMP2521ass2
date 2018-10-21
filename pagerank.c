@@ -6,6 +6,7 @@
 #include "DLList.h"
 #include "graph.h"
 
+
 #define PAGERANKARGS 4
 
 typedef struct urlRanks {
@@ -20,7 +21,7 @@ float pageRankRec (Graph g, urlRanks *ranks[], int urlRanksSize, float d, int it
 float Wout(Graph graph, int N, char *v, char *u);
 float Win(Graph graph, int N, char *u, char *p);
 
-
+void sortDescending(urlRanks *ranks[], int urlRanksSize);
 
 int main(int argc, char *args[]){
 
@@ -43,7 +44,6 @@ int main(int argc, char *args[]){
     while(curr  != NULL){
         urlRanks *rank = malloc(sizeof(urlRanks));        
         rank->url = strdup(curr->value);
-        //set outgoing links later
         //DETERMINE OUTGOING LINKS FUNCTION
         rank->outgoing = outgoingLinks(graph, curr->value);
         rank->wPR = 0;
@@ -52,33 +52,50 @@ int main(int argc, char *args[]){
         i++;                                                        
         curr = curr->next;                                            
     } 
-    /*
-    for (i = 0; i < collection->nitems; i++) {
 
-        printf("url is:%s\n", ranks[i]->url);
-    }
-*/
+    // extract parameters from stdin and feed into PageRankW
     float d;
     sscanf(args[1], "%f", &d);
     float diffPR;
     sscanf(args[2], "%f", &diffPR);
     int maxIterations;
-    sscanf(args[3], "%d", &maxIterations);    
-    
-
+    sscanf(args[3], "%d", &maxIterations);      
     PageRankW(graph, ranks, collection->nitems, d, diffPR, maxIterations);
     
+    //sort in decending order
+    sortDescending(ranks, collection->nitems);
+    
     for (i = 0; i < collection->nitems; i++) {
-
-        printf("%.7f\n", ranks[i]->wPR);
+        
+        //PRINT OUT TO THE THING
+        
+        printf("%.7f     %d\n", ranks[i]->wPR, ranks[i]->outgoing);
     }
     
-    
-    showGraph(graph, 1);
-    
+
     return 0;
 }
 
+// sorts *ranks[] in descending order using quicksort algorithm
+void sortDescending(urlRanks *ranks[], int urlRanksSize)
+{
+    int i = 0;
+    for (i = 0; i < urlRanksSize; i++) {
+        int swapped = FALSE;
+        int j = 0;
+        for (j = 0; j < urlRanksSize - 1; j++) {
+            if (ranks[j]->wPR < ranks[j + 1]->wPR){
+                urlRanks *temp = ranks[j];
+                ranks[j] = ranks[j+1];
+                ranks[j+1] =  temp;
+                swapped = TRUE;
+            }                                    
+        }
+        // if no elements were swapped, quick sort is complete
+        if (swapped == FALSE) break;                            
+    }
+
+}
 
 void PageRankW(Graph g, urlRanks *ranks[], int urlRanksSize, float d, float diffPR, int maxIterations)
 {
@@ -94,12 +111,14 @@ void PageRankW(Graph g, urlRanks *ranks[], int urlRanksSize, float d, float diff
         
             ranks[rankIndex]->wPR = pageRankRec (g, ranks, urlRanksSize, d, iteration + 1, ranks[rankIndex]);
             
+            // --------------------------THIS CAUSE WEIGHTED TO BE SLIGHTLY OFF ---------------------------
             // recalculate diff
             int i;
             for (i = 0; i < urlRanksSize; i++){
                 diff = fabsf((pageRankRec(g, ranks, urlRanksSize, d, iteration + 1, ranks[i])) - 
                         (pageRankRec(g, ranks, urlRanksSize, d, iteration, ranks[i])));            
             }   
+            // ---------------------------------------------------------------------------------------------
 
             iteration++;              
         }
@@ -165,7 +184,6 @@ float Win(Graph graph, int N, char *v, char *u){
     }
 
     return (float)((float)inlinksU/(float)totalIn);
-
 }
 
 
