@@ -66,7 +66,7 @@ void putDLList(FILE *out, DLList L)
 	assert(out != NULL); assert(L != NULL);
 	DLListNode *curr;
 	for (curr = L->first; curr != NULL; curr = curr->next)
-		fprintf(out,"%s\n",curr->value);
+		fprintf(out,"%s ",curr->value);
 }
 
 // insert an item after current item
@@ -74,7 +74,14 @@ void putDLList(FILE *out, DLList L)
 void DLListAfter(DLList L, char *it)
 {
 	assert(L != NULL);
-	//printf("THIS IS RUNNING");
+
+	//check for dups
+	DLListNode *curr = L->first;
+	while(curr != NULL){
+		if(strcmp(curr->value, it) == 0) return;
+		curr = curr->next;
+	}
+
     DLListNode *new = newDLListNode(it);
 
 	//CASE FOR IF LIST IS EMPTY

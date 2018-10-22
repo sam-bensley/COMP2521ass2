@@ -3,7 +3,21 @@
 #ifndef BSTREE_H
 #define BSTREE_H
 
+#include "DLList.h"
+
+typedef struct BSTNode {
+	DLList urlList;
+	char *value;
+	struct BSTNode *left, *right;
+} BSTNode;
+
+typedef struct BSTNode *BSTLink;
+
 typedef struct BSTNode *BSTree;
+
+
+
+
 
 // create an empty BSTree
 BSTree newBSTree();
@@ -15,7 +29,7 @@ void showBSTree(BSTree);
 void showBSTreeNode(BSTree);
 
 // print values in infix order
-void BSTreeInfix(BSTree);
+void BSTreeInfix(BSTree, FILE*);
 // print values in prefix order
 void BSTreePrefix(BSTree);
 // print values in postfix order
@@ -29,10 +43,13 @@ int BSTreeNumNodes(BSTree);
 int BSTreeNumLeaves(BSTree);
 
 // insert a new value into a BSTree
-BSTree BSTreeInsert(BSTree, int);
+BSTree BSTreeInsert(BSTree t, char *val, char *url);
 // check whether a value is in a BSTree
-int BSTreeFind(BSTree, int);
+BSTree BSTreeFind(BSTree, char*);
 // delete a value from a BSTree
-BSTree BSTreeDelete(BSTree, int);
+BSTree BSTreeDelete(BSTree, char*);
+
+// checks if str1 is lower than str2 in alphabetic rank
+int isLowerAlphabeticalOrder(char*, char*);
 
 #endif

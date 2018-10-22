@@ -6,20 +6,18 @@
 #include <string.h>
 #include "BSTree.h"
 
-typedef struct BSTNode *BSTLink;
 
-typedef struct BSTNode {
-	int value;
-	BSTLink left, right;
-} BSTNode;
 
 // make a new node containing a value
 static
-BSTLink newBSTNode(int v)
+BSTLink newBSTNode(char *v, char *url)
 {
 	BSTLink new = malloc(sizeof(BSTNode));
 	assert(new != NULL);
-	new->value = v;
+	DLList list = newDLList();
+	DLListAfter(list, url);
+	new->urlList = list;
+	new->value = strdup(v);
 	new->left = new->right = NULL;
 	return new;
 }
@@ -50,16 +48,23 @@ void showBSTree(BSTree t)
 void showBSTreeNode(BSTree t)
 {
 	if (t == NULL) return;
-	printf("%d ", t->value);
+	printf("%s ", t->value);
 }
 
 // print values in infix order
-void BSTreeInfix(BSTree t)
+void BSTreeInfix(BSTree t, FILE *fp)
 {
 	if (t == NULL) return;
-	BSTreeInfix(t->left);
-	showBSTreeNode(t);
-	BSTreeInfix(t->right);
+	BSTreeInfix(t->left, fp);
+	fprintf(fp, "%s  ", t->value);
+	
+	DLListNode *curr;
+	for (curr = t->urlList->first; curr != NULL; curr = curr->next)
+		fprintf(fp,"%s ",curr->value);
+	
+	fprintf(fp, "\n");
+
+	BSTreeInfix(t->right, fp);
 }
 
 // print values in prefix order
@@ -108,30 +113,34 @@ int BSTreeNumLeaves(BSTree t)
 }
 
 // insert a new value into a BSTree
-BSTree BSTreeInsert(BSTree t, int v)
-{
-	if (t == NULL)
-		return newBSTNode(v);
-	else if (v < t->value)
-		t->left = BSTreeInsert(t->left, v);
-	else if (v > t->value)
-		t->right = BSTreeInsert(t->right, v);
+BSTree BSTreeInsert(BSTree t, char *val, char *url){
+	if (t == NULL) return newBSTNode(val, url);
+		
+	else if (isLowerAlphabeticalOrder(val, t->value) == 1){
+		t->left = BSTreeInsert(t->left, val, url);		
+		}
+	else if (isLowerAlphabeticalOrder(val, t->value) == 0){
+		t->right = BSTreeInsert(t->right, val, url);		
+	}
 	else // (v == t->value)
-		/* don't insert duplicates */;
+	{
+		DLListAfter(t->urlList, url);
+	}
+		/* don't insert duplicates */
 	return t;
 }
 
 // check whether a value is in a BSTree
-int BSTreeFind(BSTree t, int v)
+BSTree BSTreeFind(BSTree t, char *v)
 {
 	if (t == NULL)
-		return 0;
-	else if (v < t->value)
+		return NULL;
+	else if (isLowerAlphabeticalOrder(v, t->value))
 		return BSTreeFind(t->left, v);
-	else if (v > t->value)
+	else if (!isLowerAlphabeticalOrder(v, t->value))
 		return BSTreeFind(t->right, v);
 	else // (v == t->value)
-		return 1;
+		return t;
 }
 
 // delete root of tree
@@ -140,18 +149,21 @@ BSTree deleteRoot(BSTree t)
 {
 	// if no subtrees, tree empty after delete
 	if (t->left == NULL && t->right == NULL) {
+		free(t->value);
 		free(t);
 		return NULL;
 	}
 	// if only right subtree, make it the new root
 	else if (t->left == NULL && t->right != NULL) {
 		BSTree hold = t->right;
-        free(t);
+		free(t->value);
+		free(t);
 		return hold;
 	}
 	// if only left subtree, make it the new root
 	else if (t->left != NULL && t->right == NULL) {
         BSTree hold = t->left;
+		free(t->value);
 		free(t);
 		return hold;
 	}
@@ -167,6 +179,8 @@ BSTree deleteRoot(BSTree t)
 		succ = succ->left;
 	}
 	t->value = succ->value;
+	strcpy(t->value, succ->value);
+	free(succ->value);
 	free(succ);
 	if (parent == t)
 		parent->right = succ->right;
@@ -176,19 +190,44 @@ BSTree deleteRoot(BSTree t)
 }
 
 // delete a value from a BSTree
-BSTree BSTreeDelete(BSTree t, int v)
+BSTree BSTreeDelete(BSTree t, char *v)
 {
 	if (t == NULL)
 		return NULL;
-	else if (v < t->value)
+	else if (isLowerAlphabeticalOrder(v, t->value))
 		t->left = BSTreeDelete(t->left, v);
-	else if (v > t->value)
+	else if (!isLowerAlphabeticalOrder(v, t->value))
 		t->right = BSTreeDelete(t->right, v);
 	else // (v == t->value)
 		t = deleteRoot(t);
 	return t;
 }
 
+// checks if str1 is lower than str2 in alphabetic rank
+int isLowerAlphabeticalOrder(char *str1, char *str2)
+{
+	if (str1 == NULL) return 1;
+	if (str2 == NULL) return 0;
+	// check strings are not the same
+	if (strcmp(str1, str2) == 0) return -1;
+	
+	// determine which string is shorter
+	int str1Length = strlen(str1);
+	int str2Length = strlen(str2);
+	int length = (str1Length < str2Length) ? str1Length : str2Length;
+
+	int i = 0;
+	for (i = 0; i < length - 1; i++) {
+		// check if str1[i] is less than 
+		// corresponding character in str2: 
+		if (str1[i] < str2[i]) return 1;	
+		if (str1[i] > str2[i]) return 0;			
+	}
+	// check if str1 is subset of str2
+	if (str1Length < str2Length) return 1;
+
+	return 0;
+}
 // ASCII tree printer
 // Courtesy: ponnada
 // Via: http://www.openasthra.com/c-tidbits/printing-binary-trees-in-ascii/
@@ -370,7 +409,7 @@ asciinode *build_ascii_tree_recursive(BSTree t)
 	node->right = build_ascii_tree_recursive(t->right);
 	if (node->left != NULL) node->left->parent_dir = -1;
 	if (node->right != NULL) node->right->parent_dir = 1;
-	sprintf(node->label, "%d", t->value);
+	sprintf(node->label, "%s", t->value);
 	node->lablen = strlen(node->label);;
 	return node;
 }
