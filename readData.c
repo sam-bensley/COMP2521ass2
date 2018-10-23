@@ -87,6 +87,33 @@ BSTree getTree(DLList list)
     return tree;
 }
 
+// Retrieves body of url and puts into termCountTable
+DLList getTermCountTable (char *url)
+{
+    // loop to create term count tables
+    DLList termCountTable = newDLList();
+    // temp to hold url text file        
+    char temp[BUFSIZ];
+    strcpy(temp, url);
+    strcat(temp, ".txt");                
+    FILE *urlFile = fopen(temp, "r");
+    // loop to scan in text body of url
+    char body[BUFSIZ];
+    int section2Flag = FALSE;
+    while(fscanf(urlFile, "%s", body) == 1){
+        // do not scan in "Section-2"
+        if (strcmp(body, "Section-2") == 0) { ;section2Flag = TRUE; continue; } 
+        // only add if in Section-2
+        if(section2Flag == TRUE){
+            if (strcmp(body, "#end") == 0) break;
+            trim(body);
+            DLListAfter (termCountTable, body);         
+        } 
+    }
+    return termCountTable;
+}
+
+
 // remove leading/trailing spaces from a string as
 // well as punctuation marks and turns to lower case
 void trim(char *str)

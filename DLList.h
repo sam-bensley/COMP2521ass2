@@ -11,6 +11,7 @@
 typedef struct DLListNode {
 	char   *value;  // value of this list item (string)
 	int num;
+	int repeats;
 	struct DLListNode *prev;
 	               // pointer previous node in list
 	struct DLListNode *next;
@@ -40,13 +41,11 @@ void freeDLList(DLList);
 // assumes that the file is open for writing
 void putDLList(FILE *, DLList);
 
-
 int GetIndexofItem(DLList list, char *item);
 
 // insert an item after current item
 // new item becomes current item
 void DLListAfter(DLList, char *);
-
 
 // return number of elements in a list
 int DLListLength(DLList);

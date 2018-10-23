@@ -1,0 +1,6 @@
+// Part 3
+// WE USE BRUTE FORCE METHOD
+
+
+
+

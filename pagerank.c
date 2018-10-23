@@ -1,4 +1,4 @@
-// Part A
+// Part 1-A
 
 #include <stdio.h>
 #include <math.h>
@@ -64,12 +64,9 @@ int main(int argc, char *args[]){
     
     //sort in decending order
     sortDescending(ranks, collection->nitems);
-    
-    for (i = 0; i < collection->nitems; i++) {
-        
-        //PRINT OUT TO THE THING
-        
-        printf("%.7f     %d\n", ranks[i]->wPR, ranks[i]->outgoing);
+    FILE *fp = fopen("OURpageRankList.txt", "w");
+    for (i = 0; i < collection->nitems; i++) {      
+        fprintf(fp, "%s, %d, %.7f\n", ranks[i]->url, ranks[i]->outgoing, ranks[i]->wPR);
     }
     
 

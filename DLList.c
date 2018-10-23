@@ -16,6 +16,7 @@ static DLListNode *newDLListNode(char *it)
 	new = malloc(sizeof(DLListNode));
 	assert(new != NULL);
 	new->value = strdup(it);
+	new->repeats = 0;
 	new->prev = new->next = NULL;
 	return new;
 }
@@ -66,7 +67,7 @@ void putDLList(FILE *out, DLList L)
 	assert(out != NULL); assert(L != NULL);
 	DLListNode *curr;
 	for (curr = L->first; curr != NULL; curr = curr->next)
-		fprintf(out,"%s ",curr->value);
+		fprintf(out,"%s with %d attempted repeats\n",curr->value, curr->repeats);
 }
 
 // insert an item after current item
@@ -78,7 +79,7 @@ void DLListAfter(DLList L, char *it)
 	//check for dups
 	DLListNode *curr = L->first;
 	while(curr != NULL){
-		if(strcmp(curr->value, it) == 0) return;
+		if(strcmp(curr->value, it) == 0) {curr->repeats++; return;}
 		curr = curr->next;
 	}
 
