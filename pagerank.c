@@ -111,11 +111,13 @@ void PageRankW(Graph g, urlRanks *ranks[], int urlRanksSize, float d, float diff
             // --------------------------THIS CAUSE WEIGHTED TO BE SLIGHTLY OFF ---------------------------
             // recalculate diff
             int i;
+            double sum = 0;
             for (i = 0; i < urlRanksSize; i++){
-                diff = fabsf((pageRankRec(g, ranks, urlRanksSize, d, iteration + 1, ranks[i])) - 
+                sum += fabsf((pageRankRec(g, ranks, urlRanksSize, d, iteration + 1, ranks[i])) - 
                         (pageRankRec(g, ranks, urlRanksSize, d, iteration, ranks[i])));            
             }   
             // ---------------------------------------------------------------------------------------------
+            diff = sum;
 
             iteration++;              
         }

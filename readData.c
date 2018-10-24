@@ -25,6 +25,18 @@ DLList getCollection(){
     return newList;
 }
 
+// opens "collection.txt" and puts urls into DLList
+DLList getCollectionOfUrl(char*file){
+    FILE *collection = fopen(file, "r");
+    char url[BUFSIZ];
+    DLList newList = newDLList();
+    while(fscanf(collection, "%s", url) == 1){
+        DLListAfter(newList, url);
+    }
+    fclose(collection);
+    return newList;
+}
+
 // determines if string is of "urlXX" format
 int isUrl(char *url){
     // if first 3 characters are "url"
