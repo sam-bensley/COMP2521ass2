@@ -4,34 +4,25 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "readData.c"
+#include "readData.h"
 
 
-typedef struct originalRank {
-    char *originalUrl;
-    int originalRank;
-} originalRank;
+#define MAXURLS 100
+#define MAXURLLEN 20
 
 void permute(int *a, int l, int r, int*perms);
 void swap(int *x, int *y);
-float weightedScaledFootrule (originalRank ranks[], int totalNumUrls, int setNumUrls);
-void populateOriginalRank (originalRank ranks[], DLList originalList, int totalNumUrls, int setNumUrls);
-void iterateOriginalRank (originalRank ranks[], int numUrls);
+float weightedScaledFootrule (DLList c, int *p, DLList t);
 int factorial(int f);
 int *permuations(int size);
-
+DLList getUnion (char *files[], int numFiles);
+void populatePArray(int p[], int *perms, int index, int sizeOfPerms);
+void cpyarray(int dest[], int src[], int size);
 
 int permsIndex = 0;
 
 int main(int argc, char *argv[]){
 
-    // PLAN
-    // we need to know number of rank lists (from argc)
-    // the union of T1, T2, T3... 
-    // The cardinality of the union
-    // perform algorthm on one permuation
-    // save this result and performa again on next permutation
-    // save the minimum WPC and return the permutation
 
     //get args
     if(argc == 1){
@@ -39,92 +30,138 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
-    int size = 0;
+    DLList theUnion = getUnion(argv, argc - 1);
 
+    int size = theUnion->nitems;
+
+    DLList allLists[argc-1]; 
+
+    // retrieves urls from files and populates array of originalRanks for each file
     int i;
     for(i = 1; i < argc; i++){
         DLList list = getCollectionOfUrl(argv[i]);
-        size += list->nitems;
+        allLists[i-1] = list;
+
     }
 
-    originalRank ranksAndUrls[size][argc-1];
+    // create an array of all the possible permutations
+    // can only do up to size = 11 because so inefficient
+
+    float min = 10000;
+
+    int bestP[size];
+
+    int *perms = permuations(size);
+   
+    int possiblePerms = factorial(size);
     
-    for(i = 1; i < argc; i++){
-        DLList list = getCollectionOfUrl(argv[i]);
-        populateOriginalRank(ranksAndUrls[i-1], list, size, list->nitems);
+    for(i = 0; i < possiblePerms; i++){
+        int j;
+        float scaledFootRule = 0;
+
+        
+        int p[size];
+
+        for(j = 0; j < argc-1; j++){
+
+            populatePArray(p, perms, i, size);
+            scaledFootRule += weightedScaledFootrule(theUnion, p, allLists[j]);    
+          
+        }
+        
+        if(scaledFootRule < min){
+            min = scaledFootRule;
+            cpyarray(bestP, p, size);
+
+        }
+        
+        //printf("%f\n", scaledFootRule);
+
+    }   
+
+    printf("\nMin is %f\n", min);
+    printf("with order:\n");
+    for(i = 0; i < size; i++){
+        
+        DLListNode *curr = theUnion->first;
+        while(curr != NULL){
+            if(curr->num-1 == bestP[i]){
+                printf("%s\n", curr->value);
+            }
+            curr = curr->next;
+        } 
+
     }
-    
-    // int *perms = permuations(size);
-
-
-    // int biggersize = factorial(size) * size;
-    // for(i = 0; i < biggersize; i++){
-    //      if(i%size == 0) putchar('\n');
-    //      printf("%d", perms[i]); 
-    // }
-    // putchar('\n');
-    // fucntion that returns the scaled-footrule distance for a particular
-    // list with a particular possible permuation. 
-
-    // originalRank temp = ranksAndUrls[2][1];
-    // ranksAndUrls[2][1] = ranksAndUrls[2][4];
-    // ranksAndUrls[2][4] = temp;
-
-
-    printf("%f\n", weightedScaledFootrule(ranksAndUrls[1], size, 4) + weightedScaledFootrule(ranksAndUrls[0], size, 5));
-
+    putchar('\n');
 
 
     return 0;
 }
-// original ranking of urls (list)
-// current permuations ie {1,4,2,6,5,3}
-// size of rankings (eg size of T1)
-// size of union 
-float weightedScaledFootrule (originalRank ranks[], int totalNumUrls, int setNumUrls)
+
+void cpyarray(int dest[], int src[], int size){
+    int i;
+    for(i =0; i < size; i++){
+        dest[i] = src[i]; 
+    }
+
+}
+
+
+void populatePArray(int p[], int *perms, int index, int sizeOfPerms){
+    int i;
+    for(i = 0; i < sizeOfPerms; i++){
+        //int temp = perms[index*sizeOfPerms + i];
+        p[i] = perms[index*sizeOfPerms + i];
+    }
+}
+
+
+
+float weightedScaledFootrule (DLList c, int *p, DLList t)
 {
     // C is in order: url1, url2, url3...
+
     float weight = 0;
-
-    int i;
-    for (i = 0; i < setNumUrls; i++) {
-        //printf("%f", weight);
-        if (ranks[i].originalRank == -1) continue;
-        weight += fabsf(((float)ranks[i].originalRank/(float)setNumUrls) - ((float)(i+1)/(float)totalNumUrls));
+    DLListNode *curr = c->first;
+    while(curr != NULL){
         
-    }
-    
-    return weight;   
-}
+        int tc = -1;
+        
+        //printf("%s\n", curr->value);
 
-void populateOriginalRank (originalRank ranks[], DLList originalList, int totalNumUrls, int setNumUrls)
-{
-    // populate ranks[] with urls and their original rankings
-    DLListNode *curr = originalList->first;
-    while (curr != NULL) {
-        ranks[curr->num].originalRank = curr->num + 1;
-        ranks[curr->num].originalUrl = strdup(curr->value);
-        curr=curr->next;
-    }
+        DLListNode *newCurr = t->first;
 
-    // populate remaining array with NULLS and -1
-    if (setNumUrls < totalNumUrls){
-        int i;
-        for (i = setNumUrls; i < totalNumUrls; i++) {
-            ranks[i].originalRank = -1;
-            ranks[i].originalUrl = NULL;
+        while(newCurr != NULL){
+            //printf("P%sP and P%sP\n", curr->value, newCurr->value);
+
+            if(strcmp(curr->value, newCurr->value) == 0){
+                
+                tc = newCurr->num;
+                break;
+            }
+
+            newCurr = newCurr->next;
         }
+        float numeratorOne = (float)tc;      
+        float denomanatorOne = (float)t->nitems;
+        float numeratorTwo = (float)p[curr->num-1] +1;
+        float denomanatorTwo = (float)c->nitems;
+        //printf("%.7f/%.7f - %.7f/%.7f\n", numeratorOne, denomanatorOne, numeratorTwo, denomanatorTwo);
+
+        if(tc != -1){
+            weight += fabsf((numeratorOne / denomanatorOne) - (numeratorTwo / denomanatorTwo));
+        }
+        //weight += fabsf((((float)tc)/((float)t->nitems)) - (((float)p[curr->num-1])/((float)c->nitems)));
+
+        curr = curr->next;
     }
-}
 
-void iterateOriginalRank (originalRank ranks[], int numUrls)
-{
-
-
-
+    return weight;
 
 }
 
+
+// have to represent as a singular array
 int *permuations(int size){
 
     int possiblePerms = factorial(size);
@@ -139,8 +176,6 @@ int *permuations(int size){
     
     permute(str, 0, n-1, perms); 
     
-    
-
     return perms;
 }
 
@@ -191,11 +226,27 @@ void permute(int *a, int l, int r, int*perms)
        } 
    } 
 } 
-  
 
+DLList getUnion (char *files[], int numFiles) {
 
+    // DLList to hold urls in the files (this does not add repeats)
+    // so is really useful for determining the union
+    DLList unionList = newDLList();
 
+    // open files and read urls
+    int i;
+    for (i = 1; i < numFiles; i++) {       
+        FILE *fp = fopen(files[i], "r");
+        char url[BUFSIZ];              
+        while(fscanf(fp, "%s", url) == 1){
+            DLListAfter(unionList, url);
+        }    
+    }
+    //int unionSize = unionList->nitems; 
+    //freeDLList(unionList);
 
+    return unionList;
+}
 
 
 

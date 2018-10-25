@@ -90,7 +90,7 @@ void DLListAfter(DLList L, char *it)
 	
 	    L->first = new;
 	    L->last = new;
-		new->num = 0;
+		new->num = 1;
 	    L->nitems++;
 	    return;
 	}

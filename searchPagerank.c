@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "DLList.h"
+#include "readData.h"
 #include <string.h>
 
 typedef struct UrlAndWord{
@@ -20,7 +21,6 @@ typedef struct searchResults {
 } searchResults;
 
 
-int isUrl(char *url);
 void sortDescendingRepeats(searchResults SReults[], int size);
 void sortDescendingWPR(searchResults SReults[], int size);
 
@@ -167,9 +167,5 @@ void sortDescendingWPR(searchResults SReults[], int size){
     }
 
 }
-// determines if string is of "urlXX" format
-int isUrl(char *url){
-    // if first 3 characters are "url"
-    return (strncmp(url, "url", 3) == 0) ? 1 : 0;
-}
+
 

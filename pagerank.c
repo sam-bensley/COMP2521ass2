@@ -2,10 +2,9 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "readData.c"
-#include "DLList.h"
-#include "graph.h"
-
+#include <stdlib.h>
+#include <string.h>
+#include "readData.h"
 
 #define PAGERANKARGS 4
 
@@ -64,7 +63,7 @@ int main(int argc, char *args[]){
     
     //sort in decending order
     sortDescending(ranks, collection->nitems);
-    FILE *fp = fopen("OURpageRankList.txt", "w");
+    FILE *fp = fopen("pagerankList.txt", "w");
     for (i = 0; i < collection->nitems; i++) {      
         fprintf(fp, "%s, %d, %.7f\n", ranks[i]->url, ranks[i]->outgoing, ranks[i]->wPR);
     }

@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "DLList.h"
-#include "readData.c"
+#include "readData.h"
 
 #define MAXURLSTOPRINT 30
 

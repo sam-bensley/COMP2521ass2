@@ -5,7 +5,7 @@
 
 #include "BSTree.h"
 #include "DLList.h"
-#include "readData.c"
+#include "readData.h"
 
 
 int main(int argc, char*argv[]){

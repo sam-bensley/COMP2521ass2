@@ -1,17 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "DLList.h"
-#include "graph.h"
-#include "BSTree.h"
+#include "readData.h"
 #include <ctype.h>
 
 #define TRUE 1
 #define FALSE !TRUE
-
-int isUrl(char *url);
-void trim(char *str);
-int removeCharFromEnd (char ch);
 
 // opens "collection.txt" and puts urls into DLList
 DLList getCollection(){
